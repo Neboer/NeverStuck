@@ -8,7 +8,8 @@
 
 typedef struct
 {
-    int pipefd0;
+    int pipefd_read;
+    int pipefd_write;
     int pid;
 } ExecInfo;
 

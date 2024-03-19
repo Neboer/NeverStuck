@@ -5,14 +5,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-struct Option
+typedef struct
 {
     int max_stuck_time_sec;
     char *start_successful_output;
-    char *command;
     char *arguments;
-};
+} Options;
 
-struct Option parse_options(int argc, char *argv[]);
+Options* parse_options(int argc, char *argv[]);
 
 #endif

@@ -45,7 +45,7 @@ void matcher_resize_buffer(Matcher *matcher, size_t n) {
     matcher->buffer = new_buffer;
 }
 
-int matcher_receive(Matcher *matcher, const char *new_content) {
+MatchResult matcher_receive(Matcher *matcher, const char *new_content) {
     if (matcher->buffer == NULL) {
         matcher->buffer = strdup(new_content);
     } else {

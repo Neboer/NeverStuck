@@ -51,6 +51,7 @@ ExecInfo* fork_new_thread(char **arg_list)
 
     ExecInfo *exec_result = (ExecInfo *)malloc(sizeof(ExecInfo));
     exec_result->pid = pid;
-    exec_result->pipefd0 = pipefd[0];
+    exec_result->pipefd_read = pipefd[0];
+    exec_result->pipefd_write = pipefd[1];
     return exec_result;
 }
