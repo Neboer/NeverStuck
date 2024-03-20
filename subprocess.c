@@ -6,8 +6,7 @@ int exec_and_output_to_fd(int *pipefd, char **arg_list)
     close(pipefd[0]);
 
     // 将标准输出重定向到管道写端
-    dup2(pipefd[1], STDOUT_FILENO);
-    // dup2(pipefd[1], STDERR_FILENO);
+    dup2(pipefd[1], STDOUT_FILENO); 
 
     // 关闭不需要的文件描述符
     close(pipefd[1]);

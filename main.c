@@ -63,6 +63,7 @@ int main(int argc, char **argv)
     matcher_destroy(matcher);
     if (wait_result == PROG_SUCCESS)
     {
+        fprintf(stderr, "program started successfully.\n");
         // 程序成功启动，开始转发程序的标准输出。此时的程序就是一个无情的转发机器。
         int status;
         ssize_t bytes_read;
