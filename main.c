@@ -2,14 +2,12 @@
 #include "stream_match.h"
 #include "subprocess.h"
 #include "timeout_read.h"
+#include "kill_process.h"
+
 #define BUFFER_SIZE 1024
 #define PROG_SUCCESS 1
 #define PROG_STUCK -1
 #define PROG_ERROR -2
-
-int kill_process(int pid, int normal_exit_wait_ms)
-{
-}
 
 int wait_program_success(int fd_read, int timeout_ms, Matcher *matcher)
 {
@@ -61,9 +59,11 @@ int main(int argc, char **argv)
     close(exec_thread->pipefd_write);
 
     int wait_result = wait_program_success(exec_thread->pipefd_read, opts->max_stuck_time_sec * 1000, matcher);
+    // 这里退出，说明matcher不需要继续使用了。回收其内存空间。
+    matcher_destroy(matcher);
     if (wait_result == PROG_SUCCESS)
     {
-        // 程序成功启动，开始转发程序的标准输出。
+        // 程序成功启动，开始转发程序的标准输出。此时的程序就是一个无情的转发机器。
         int status;
         ssize_t bytes_read;
         char buffer[BUFFER_SIZE];
@@ -71,16 +71,27 @@ int main(int argc, char **argv)
         {
             write(STDOUT_FILENO, buffer, bytes_read);
         }
-        if (bytes_read == 0) {
-            
+        // 如果程序读失败了……打印错误。
+        if (bytes_read < 0)
+        {
+            perror("read");
         }
+        // 保护子进程，直到子进程退出。
+        waitpid(exec_thread->pid, &status, 0);
+        return status; // 保证主进程的输出结果和子进程相同。
     }
     else if (wait_result == PROG_STUCK)
     {
-        // 给程序20秒的时间退出
-        int kill_result = kill_process(exec_thread->pid, 20 * 1000);
+        // 判断程序卡死，给程序20秒的时间退出
+        ProcInfo *kill_result = kill_process(exec_thread->pid, 20 * 1000);
+        if (kill_result->status != KILL_ERROR)
+        {
+            return kill_result->exit_code;
+        }
+        // 如果不能正确的杀死程序，那么只能等待程序自行退出了。
     }
     int status = 0;
     // 如果读取失败或EOF，阻塞的等待子进程退出即可。
     waitpid(exec_thread->pid, &status, 0);
+    return status;
 }
