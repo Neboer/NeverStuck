@@ -1,5 +1,18 @@
 #!/bin/bash
 
+
+
+function handle_ctrlc()
+{
+    while true; do
+        sleep 1
+    done
+}
+
+# trapping the SIGINT signal
+trap handle_ctrlc SIGTERM
+
+# test_usage: ./nstuck -t 3 -o good -- ./test_program.sh 1 3 test good well
 # 检查参数个数是否正确
 if [ "$#" -lt 4 ]; then
     echo "Usage: $0 <timemin> <timemax> <strs>..."

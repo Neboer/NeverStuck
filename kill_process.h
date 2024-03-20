@@ -1,8 +1,6 @@
 #ifndef KILL_PROC_H
 #define KILL_PROC_H
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -18,6 +16,6 @@ typedef struct
     int status;
 } ProcInfo;
 
-ProcInfo *kill_process(int pid, int normal_exit_wait_sec);
+ProcInfo *kill_proc_grp_by_pid(int pid, int normal_exit_wait_sec);
 
 #endif

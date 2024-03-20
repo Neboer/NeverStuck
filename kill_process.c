@@ -1,12 +1,13 @@
 #include "kill_process.h"
 
-ProcInfo *kill_process(int pid, int normal_exit_wait_sec)
+ProcInfo *kill_proc_grp_by_pid(int pid, int normal_exit_wait_sec)
 {
     ProcInfo *kill_result = malloc(sizeof(ProcInfo));
+    int pgid = getpgid(pid);
     // 向进程发送终止信号
-    if (kill(pid, SIGTERM) == -1)
+    if (killpg(pgid, SIGTERM) == -1)
     {
-        perror("kill");
+        perror("killpg");
         kill_result->status = KILL_ERROR;
         return kill_result;
     }
@@ -37,9 +38,9 @@ ProcInfo *kill_process(int pid, int normal_exit_wait_sec)
     }
 
     // 等待超时，强行杀死进程
-    if (kill(pid, SIGKILL) == -1)
+    if (killpg(pgid, SIGTERM) == -1)
     {
-        perror("kill");
+        perror("killpg");
         kill_result->status = KILL_ERROR;
         return kill_result;
     }

@@ -1,6 +1,6 @@
 # 定义编译器和编译选项
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c11
+CFLAGS = -Wall -Wextra -std=c99 -D_POSIX_C_SOURCE
 
 # 源文件目录
 SRCDIR = .

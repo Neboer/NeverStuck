@@ -74,7 +74,7 @@ int main(int argc, char **argv)
     matcher_destroy(matcher);
     if (wait_result == PROG_SUCCESS)
     {
-        fprintf(stderr, "program started successfully.\n");
+        fprintf(stderr, "program %d started successfully.\n", proc_pid);
         // 程序成功启动，开始转发程序的标准输出。此时的程序就是一个无情的转发机器。
         int status;
         ssize_t bytes_read;
@@ -96,10 +96,10 @@ int main(int argc, char **argv)
     {
         // 判断程序卡死，给程序20秒的时间退出
         fprintf(stderr, "program stuck! killing...\n");
-        ProcInfo *kill_result = kill_process(exec_thread->pid, 20 * 1000);
+        ProcInfo *kill_result = kill_proc_grp_by_pid(exec_thread->pid, 20);
         if (kill_result->status != KILL_ERROR)
         {
-            fprintf(stderr, "successful killed program.\n");
+            fprintf(stderr, "successful killed program group of %d.\n", exec_thread->pid);
             return kill_result->exit_code;
         }
         // 如果不能正确的杀死程序，那么只能等待程序自行退出了。
@@ -110,14 +110,14 @@ int main(int argc, char **argv)
     return status;
 }
 
-void exit_handler(int signum) {
+void exit_handler(int _signum) {
         // 主线程退出后，需要将子进程杀死。
         fprintf(stderr, "master process exit, exiting...\n");
         if (proc_pid > 0) {
-            ProcInfo *kill_result = kill_process(proc_pid, 20 * 1000);
+            ProcInfo *kill_result = kill_proc_grp_by_pid(proc_pid, 20);
             if (kill_result->status != KILL_ERROR)
             {
-                fprintf(stderr, "successful killed program.\n");
+                fprintf(stderr, "successful killed program group of %d.\n", proc_pid);
                 return ;
             }
         }
