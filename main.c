@@ -4,10 +4,14 @@
 #include "timeout_read.h"
 #include "kill_process.h"
 
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 10240
 #define PROG_SUCCESS 1
 #define PROG_STUCK -1
 #define PROG_ERROR -2
+
+int proc_pid = -1;
+
+void exit_handler(int signum);
 
 int wait_program_success(int fd_read, int timeout_ms, Matcher *matcher)
 {
@@ -45,7 +49,7 @@ int wait_program_success(int fd_read, int timeout_ms, Matcher *matcher)
                 return PROG_SUCCESS;
             }
         }
-        sleep(1); // 每秒读一次。
+        // 不要等待，立刻开始新的读取。
     }
 }
 
@@ -54,7 +58,14 @@ int main(int argc, char **argv)
     Options *opts = parse_options(argc, argv);
     Matcher *matcher = matcher_init(opts->start_successful_output);
 
+    // 注册信号处理函数
+    if (signal(SIGINT, exit_handler) == SIG_ERR) {
+        perror("signal");
+        exit(EXIT_FAILURE);
+    }
+
     ExecInfo *exec_thread = fork_new_thread(opts->arguments);
+    proc_pid = exec_thread->pid;
 
     close(exec_thread->pipefd_write);
 
@@ -98,3 +109,16 @@ int main(int argc, char **argv)
     waitpid(exec_thread->pid, &status, 0);
     return status;
 }
+
+void exit_handler(int signum) {
+        // 主线程退出后，需要将子进程杀死。
+        fprintf(stderr, "master process exit, exiting...\n");
+        if (proc_pid > 0) {
+            ProcInfo *kill_result = kill_process(proc_pid, 20 * 1000);
+            if (kill_result->status != KILL_ERROR)
+            {
+                fprintf(stderr, "successful killed program.\n");
+                return ;
+            }
+        }
+};

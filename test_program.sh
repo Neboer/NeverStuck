@@ -17,7 +17,7 @@ while true; do
     # 生成随机等待时间
     random_time=$(shuf -i $timemin-$timemax -n 1)
     sleep $random_time
-    
+    >&2 echo "error"
     # 随机选择一个元素并输出
     size=${#strs[@]}
     index=$(($RANDOM % $size))
