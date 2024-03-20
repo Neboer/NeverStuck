@@ -83,9 +83,11 @@ int main(int argc, char **argv)
     else if (wait_result == PROG_STUCK)
     {
         // 判断程序卡死，给程序20秒的时间退出
+        fprintf(stderr, "program stuck! killing...\n");
         ProcInfo *kill_result = kill_process(exec_thread->pid, 20 * 1000);
         if (kill_result->status != KILL_ERROR)
         {
+            fprintf(stderr, "successful killed program.\n");
             return kill_result->exit_code;
         }
         // 如果不能正确的杀死程序，那么只能等待程序自行退出了。

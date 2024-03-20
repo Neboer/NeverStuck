@@ -7,7 +7,7 @@ int exec_and_output_to_fd(int *pipefd, char **arg_list)
 
     // 将标准输出重定向到管道写端
     dup2(pipefd[1], STDOUT_FILENO);
-    dup2(pipefd[1], STDERR_FILENO);
+    // dup2(pipefd[1], STDERR_FILENO);
 
     // 关闭不需要的文件描述符
     close(pipefd[1]);
@@ -30,7 +30,7 @@ ExecInfo* fork_new_thread(char **arg_list)
     if (pipe(pipefd) == -1)
     {
         perror("pipe");
-        return EXIT_FAILURE;
+        return NULL;
     }
 
     pid = fork();

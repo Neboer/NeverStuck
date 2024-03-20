@@ -1,4 +1,3 @@
-
 #include "kill_process.h"
 
 ProcInfo *kill_process(int pid, int normal_exit_wait_sec)

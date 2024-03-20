@@ -1,37 +1,45 @@
 #include "stream_match.h"
 
-
-Matcher* matcher_init(const char *match_target) {
+Matcher *matcher_init(const char *match_target)
+{
     Matcher *matcher = (Matcher *)malloc(sizeof(Matcher));
-    if (matcher == NULL) {
+    if (matcher == NULL)
+    {
         perror("malloc failed");
         exit(EXIT_FAILURE);
     }
-
-    matcher->match_target = strdup(match_target);
+    
     matcher->target_length = strlen(match_target);
 
-    if (matcher->match_target == NULL) {
-        perror("strdup failed");
+    matcher->match_target = (char *)malloc((matcher->target_length + 1) * sizeof(char));
+    if (matcher->match_target == NULL)
+    {
+        perror("malloc failed");
         free(matcher);
         exit(EXIT_FAILURE);
     }
+
+    strcpy(matcher->match_target, match_target);
+
 
     matcher->buffer = NULL;
 
     return matcher;
 }
 
-void matcher_resize_buffer(Matcher *matcher, size_t n) {
+void matcher_resize_buffer(Matcher *matcher, size_t n)
+{
     size_t old_len = strlen(matcher->buffer);
-    
-    if (old_len <= n) {
+
+    if (old_len <= n)
+    {
         // 不需要缩小
         return;
     }
-    
+
     char *new_buffer = (char *)malloc((n + 1) * sizeof(char));
-    if (new_buffer == NULL) {
+    if (new_buffer == NULL)
+    {
         perror("malloc failed");
         exit(EXIT_FAILURE);
     }
@@ -45,23 +53,38 @@ void matcher_resize_buffer(Matcher *matcher, size_t n) {
     matcher->buffer = new_buffer;
 }
 
-MatchResult matcher_receive(Matcher *matcher, const char *new_content) {
-    if (matcher->buffer == NULL) {
-        matcher->buffer = strdup(new_content);
-    } else {
+MatchResult matcher_receive(Matcher *matcher, const char *new_content)
+{
+    if (matcher->buffer == NULL)
+    {
+        matcher->buffer = (char *)malloc((strlen(new_content) + 1) * sizeof(char));
+        if (matcher->buffer == NULL)
+        {
+            perror("malloc failed");
+            exit(EXIT_FAILURE);
+        }
+
+        strcpy(matcher->buffer, new_content);
+    }
+    else
+    {
         size_t old_len = strlen(matcher->buffer);
         size_t new_len = strlen(new_content);
         matcher->buffer = realloc(matcher->buffer, old_len + new_len + 1);
-        if (matcher->buffer == NULL) {
+        if (matcher->buffer == NULL)
+        {
             perror("realloc failed");
             exit(EXIT_FAILURE);
         }
         strcat(matcher->buffer, new_content);
     }
 
-    if (strstr(matcher->buffer, matcher->match_target) != NULL) {
+    if (strstr(matcher->buffer, matcher->match_target) != NULL)
+    {
         return MATCH;
-    } else {
+    }
+    else
+    {
         // not match. we shrink the buffer to the size of target.
         matcher_resize_buffer(matcher, matcher->target_length - 1);
 
@@ -69,8 +92,10 @@ MatchResult matcher_receive(Matcher *matcher, const char *new_content) {
     }
 }
 
-void matcher_destroy(Matcher *matcher) {
-    free(matcher->match_target);
+void matcher_destroy(Matcher *matcher)
+{
+    // 这里不释放match_target，因为match target谁知道是哪来的！反正不归我管。
+    // free(matcher->match_target);
     free(matcher->buffer);
     free(matcher);
 }
