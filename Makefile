@@ -1,6 +1,7 @@
 # 定义编译器和编译选项
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c99 -D_POSIX_C_SOURCE
+LDFLAGS = -lsystemd
 
 # 源文件目录
 SRCDIR = .
@@ -19,7 +20,7 @@ all: $(TARGET)
 
 # 生成目标
 $(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
